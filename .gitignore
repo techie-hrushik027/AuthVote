@@ -1,0 +1,8 @@
+.env
+__pycache__/
+
+*.exe
+*.o
+Admin_Console/output/
+
+live_results.txt

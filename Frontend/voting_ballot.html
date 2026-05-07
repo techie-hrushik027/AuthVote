@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Official Ballot</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background: #eee;
+            padding-top: 50px;
+        }
+
+        .card {
+            background: white;
+            width: 350px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #b-timer {
+            color: red;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #007bff;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>Cast Your Vote</h2>
+        <p>Proctoring Active. Time Left: <span id="b-timer">300</span>s</p>
+        <hr>
+        <div id="dynamic-candidates">Loading ballot...</div>
+    </div>
+    <script>
+        let timeLeft = 300, prn = localStorage.getItem('voter_prn');
+
+        // Dynamically load candidates from SQL
+        window.onload = async () => {
+            const res = await fetch('/api/candidates');
+            const candidates = await res.json();
+            let html = "";
+            candidates.forEach(c => {
+                html += `<button onclick="castVote(${c.candidate_id})">${c.name} <br><small>(${c.council})</small></button>`;
+            });
+            document.getElementById('dynamic-candidates').innerHTML = html;
+        };
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                fetch('/api/violation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prn: prn, reason: "Tab Switch" }) });
+                alert("VIOLATION: Do not leave this tab!");
+            }
+        });
+        setInterval(() => { if (--timeLeft <= 0) location.href = "/"; document.getElementById('b-timer').innerText = timeLeft; }, 1000);
+
+        async function castVote(cId) {
+            const res = await fetch('/api/cast_vote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prn: prn, candidate_id: cId }) });
+            if (res.ok) {
+                const data = await res.json();
+                alert(`Vote Cast! Your Anonymous Receipt Hash is:\n\n${data.receipt}\n\nPlease save this for verification.`);
+                localStorage.clear(); location.href = "/";
+            } else alert("Error casting vote. You may be locked out or the election has ended.");
+        }
+    </script>
+</body>
+
+</html>

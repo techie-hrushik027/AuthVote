@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Election Guidelines</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 500px;
+            text-align: left;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .warning {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Election Guidelines</h2>
+        <ul>
+            <li>You will enter the <b>Rapid Fire Verification</b> round.</li>
+            <li>You have exactly <span class="warning">60 Seconds</span> to answer 5 random personal security questions.
+            </li>
+            <li>Switching tabs will log a security violation strike.</li>
+        </ul>
+        <hr>
+        <p><input type="checkbox" id="agree" onclick="document.getElementById('startBtn').disabled = !this.checked"> I
+            understand.</p>
+        <button id="startBtn" onclick="window.location.href='/rapid_fire.html'" disabled>Start Verification</button>
+    </div>
+</body>
+
+</html>

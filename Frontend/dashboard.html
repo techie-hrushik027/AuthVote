@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AuthVote Admin Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #00ffcc;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: #111;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
+            width: 30%;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: linear-gradient(90deg, #00ffcc, #ff0055);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .alert {
+            color: #ff0055;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ff0055;
+        }
+
+        .metric {
+            color: #00ffcc;
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px #00ffcc;
+        }
+
+        p {
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>AuthVote 2.0 // Live Telemetry</h1>
+    <div class="dashboard">
+        <div class="card">
+            <h2 style="color:#ddd">Live Turnout</h2>
+            <canvas id="voteChart"></canvas>
+        </div>
+        <div class="card">
+            <h2 style="color:#ddd">Voting Progress</h2>
+            <div class="metric" id="turnout">0%</div>
+            <p>Voters Completed</p>
+        </div>
+        <div class="card">
+            <h2 style="color:#ddd">Security Alerts</h2>
+            <div class="alert" id="violationCount">0</div>
+            <p>Total Automated Revocations</p>
+        </div>
+    </div>
+    <script>
+        let chart;
+        setInterval(async () => {
+            const res = await fetch('/api/admin/stats'); const data = await res.json();
+            document.getElementById('violationCount').innerText = data.violations;
+            document.getElementById('turnout').innerText = ((data.total_voted / Math.max(data.total_voters, 1)) * 100).toFixed(1) + "%";
+
+            Chart.defaults.color = '#888';
+            if (!chart) chart = new Chart(document.getElementById('voteChart'), { type: 'bar', data: { labels: data.votes.map(v => v.name.split(" ")[0]), datasets: [{ label: 'Votes', data: data.votes.map(v => v.votes), backgroundColor: '#00ffcc', borderColor: '#fff', borderWidth: 1 }] }, options: { scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+            else { chart.data.datasets[0].data = data.votes.map(v => v.votes); chart.update(); }
+        }, 3000);
+    </script>
+</body>
+
+</html>

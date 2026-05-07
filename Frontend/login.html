@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AuthVote Login</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            width: 95%;
+            padding: 12px;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>AuthVote Secure Login</h2><input type="text" id="prn" placeholder="Student PRN"><input type="password"
+            id="pin" placeholder="Official PIN"><button onclick="handleLogin()">Authenticate</button>
+    </div>
+    <script>
+        async function handleLogin() {
+            const prn = document.getElementById('prn').value, pin = document.getElementById('pin').value;
+            const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prn, pin }) });
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('voter_prn', prn); localStorage.setItem('profile_data', JSON.stringify(data.profile)); window.location.href = "/instructions.html";
+            } else {
+                const error = await res.json(); alert("System Message: " + error.detail);
+            }
+        }
+    </script>
+</body>
+
+</html>

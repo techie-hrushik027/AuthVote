@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Verification</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 95%;
+            padding: 14px;
+            background: #28a745;
+            color: white;
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        #timer {
+            color: #dc3545;
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .q-label {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #333;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: normal;
+            display: block;
+            margin-top: 5px;
+        }
+
+        #progress {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Identity Verification</h2>
+        <div id="timer">60</div>
+        <div id="progress">Question 1 of 5</div>
+        <div id="question-area">
+            <label class="q-label" id="current-label"></label>
+            <span class="hint" id="current-hint"></span>
+            <input type="text" id="answer-input" autocomplete="off" placeholder="Type your answer here...">
+            <button onclick="checkAndNext()">Next Question</button>
+        </div>
+    </div>
+    <script>
+        let timeLeft = 60, timerInterval;
+        let selectedFields = [], currentIndex = 0;
+        let challengeData = JSON.parse(localStorage.getItem('profile_data'));
+
+        const questionData = {
+            'dob': { text: 'Date of Birth', hint: '(Must be YYYY-MM-DD)' }, 'mother_name': { text: 'Mother\'s First Name', hint: '' }, 'father_name': { text: 'Father\'s First Name', hint: '' }, 'blood_group': { text: 'Blood Group', hint: '(e.g., O-, B+)' }, 'city': { text: 'City of Residence', hint: '' }, 'aadhar_last_4': { text: 'Aadhar Last 4 Digits', hint: '' }, 'email': { text: 'University Email', hint: '' }
+        };
+
+        window.onload = () => {
+            let fields = Object.keys(challengeData).filter(k => challengeData[k]);
+            selectedFields = fields.sort(() => 0.5 - Math.random()).slice(0, 5);
+            timerInterval = setInterval(() => { if (--timeLeft <= 0) triggerViolation("Timeout - You exceeded 60 seconds."); document.getElementById('timer').innerText = timeLeft; }, 1000);
+            loadQuestion();
+            document.getElementById("answer-input").addEventListener("keypress", function (event) { if (event.key === "Enter") checkAndNext(); });
+        };
+
+        function loadQuestion() {
+            let field = selectedFields[currentIndex];
+            document.getElementById('progress').innerText = `Question ${currentIndex + 1} of 5`;
+            document.getElementById('current-label').innerText = questionData[field].text;
+            document.getElementById('current-hint').innerText = questionData[field].hint;
+            document.getElementById('answer-input').value = ""; document.getElementById('answer-input').focus();
+        }
+
+        function checkAndNext() {
+            let field = selectedFields[currentIndex];
+            let userAns = document.getElementById('answer-input').value.trim().toLowerCase();
+            let dbAns = String(challengeData[field]).trim().toLowerCase();
+            if (userAns !== dbAns) return triggerViolation(`Verification Failed on Question ${currentIndex + 1}`);
+            currentIndex++;
+            if (currentIndex < 5) loadQuestion(); else { clearInterval(timerInterval); window.location.href = "/voting_ballot.html"; }
+        }
+
+        async function triggerViolation(reason) {
+            clearInterval(timerInterval);
+            await fetch('/api/violation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prn: localStorage.getItem('voter_prn'), reason: reason }) });
+            alert("VIOLATION LOGGED: " + reason); window.location.href = "/";
+        }
+    </script>
+</body>
+
+</html>
