@@ -62,11 +62,12 @@ CREATE TABLE LoginAudit (
 
 DELIMITER //
 CREATE TRIGGER prevent_vote_update BEFORE UPDATE ON VoteBox
-FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='SECURITY ALERT: Votes are immutable.'; //
+FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='SECURITY ALERT: Votes tempering not allowed.'; //
 
 CREATE TRIGGER prevent_vote_delete BEFORE DELETE ON VoteBox
 FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='SECURITY ALERT: Votes are immutable and cannot be deleted.'; //
 
+/* Status Update*/
 CREATE TRIGGER enforce_two_strike_rule BEFORE UPDATE ON VoterRegistry
 FOR EACH ROW BEGIN
     IF NEW.failed_attempts >= 2 AND OLD.locked_status = 'ACTIVE' THEN
@@ -123,7 +124,6 @@ INSERT INTO CandidateRegistry (candidate_id, name, council) VALUES
 (1, 'Raghav', 'Engineering'), (2, 'Yash', 'Science'), (3, 'Vinay', 'Management');
 
 INSERT INTO VoterRegistry (prn, name, email, dob, mother_name, father_name, blood_group, city, aadhar_last_4, local_address, hashed_pin) VALUES
-('1262241493', 'Hrushikesh Kapre', 'kaprehrushikeshwork@gmail.com', '2006-06-27', 'Pranjali', 'Praveen', NULL, 'Amravati', '6353', 'Kothrud, Pune', 'PENDING'),
 ('1262241494', 'Khushi ', 'kaprehrushikeshwork@gmail.com', '2006-10-07', NULL, 'Rajesh', 'B+', 'Pune', NULL , 'Shivajinagar', 'PENDING');
 
 

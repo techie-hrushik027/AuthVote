@@ -1,0 +1,52 @@
+# Git metadata and local agent/tool configuration
+.git
+.git/**
+.agents
+.agents/**
+.codex
+.codex/**
+.aws
+.aws/**
+
+# Environment files, credentials, and private keys
+.env
+.env.*
+**/.env
+**/.env.*
+**/secrets/**
+**/*credentials*
+*.pem
+*.key
+*.p12
+*.pfx
+*.p7b
+id_rsa*
+id_ed25519*
+
+# Python environments, bytecode, and caches
+.venv
+.venv/**
+venv
+venv/**
+env
+env/**
+**/__pycache__/**
+*.py[cod]
+.pytest_cache
+.pytest_cache/**
+.mypy_cache
+.mypy_cache/**
+.ruff_cache
+.ruff_cache/**
+
+# Components not needed by the FastAPI application image
+Admin_Console
+Admin_Console/**
+Database
+Database/**
+
+# Local outputs and repository documentation
+**/live_results.txt
+PROJECT_STATUS.md
+README.md
+.gitignore

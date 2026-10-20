@@ -11,13 +11,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, "Frontend")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-def get_db(): 
+def get_db(): #Database always on solved
     return pymysql.connect(
         host=os.getenv("DB_HOST"), 
         user=os.getenv("DB_USER"), 
         password=os.getenv("DB_PASSWORD"), 
         database=os.getenv("DB_NAME"), 
-        cursorclass=pymysql.cursors.DictCursor
+        cursorclass=pymysql.cursors.DictCursor 
     )
 
 @app.get("/")
@@ -40,7 +40,6 @@ async def login(data: dict):
             if state == 'PENDING': raise HTTPException(403, "Election has not started yet.")
             if state == 'ENDED': raise HTTPException(403, "Election has concluded.")
 
-            # WE ADDED 'has_voted' TO THE SELECT QUERY HERE:
             cursor.execute("""SELECT voter_id, locked_status, has_voted, (hashed_pin = SHA2(%s, 256)) AS is_pin_correct, dob, mother_name, father_name, blood_group, city, aadhar_last_4, email FROM VoterRegistry WHERE prn = %s""", (data.get("pin"), data.get("prn")))
             voter = cursor.fetchone()
             
@@ -86,7 +85,7 @@ async def cast_vote(data: dict):
             cursor.execute("SELECT voter_id FROM VoterRegistry WHERE prn = %s", (data.get("prn"),))
             voter = cursor.fetchone()
             cursor.execute("SELECT session_id FROM SessionManagement WHERE voter_id = %s ORDER BY created_at DESC LIMIT 1", (voter['voter_id'],))
-            session = cursor.fetchone()
+            session = cursor.fetchone() #Active session check
             receipt = str(uuid.uuid4())
             h = hashlib.sha256(f"{voter['voter_id']}{data.get('candidate_id')}{receipt}".encode()).hexdigest()
             cursor.callproc('sp_cast_vote', (voter['voter_id'], data.get('candidate_id'), session['session_id'], h, receipt))
