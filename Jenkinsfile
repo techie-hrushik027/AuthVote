@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     options {
-        // Use the explicit Checkout stage below and avoid overlapping runs
-        // that could try to use the same temporary container name.
         skipDefaultCheckout(true)
         disableConcurrentBuilds()
     }
@@ -29,7 +27,6 @@ pipeline {
         stage('Verify container health over HTTP') {
             steps {
                 script {
-                    // Include the job name so other Jenkins jobs do not collide.
                     def safeJobName = env.JOB_NAME.replaceAll(/[^A-Za-z0-9_.-]/, '-')
                     def temporaryContainer = "authvote-ci-${safeJobName}-${env.BUILD_NUMBER}"
 
@@ -69,7 +66,6 @@ pipeline {
                                 exit 1
                             '''
                         } finally {
-                            // Only remove this uniquely named CI container.
                             sh 'docker rm --force "$CI_CONTAINER_NAME" >/dev/null 2>&1 || true'
                         }
                     }
@@ -80,7 +76,6 @@ pipeline {
         stage('Docker Hub login') {
             steps {
                 script {
-                    // Jenkins credential scope is provided by Docker Pipeline.
                     docker.withRegistry(env.DOCKER_HUB_URL, 'dockerhub-creds') {
                         sh 'docker image inspect "$IMAGE_REPO:$BUILD_NUMBER" >/dev/null'
                         echo 'Docker Hub credential scope is ready for the push stage.'
@@ -92,7 +87,6 @@ pipeline {
         stage('Push images to Docker Hub') {
             steps {
                 script {
-                    // Keep the registry credentials scoped to the push operation.
                     docker.withRegistry(env.DOCKER_HUB_URL, 'dockerhub-creds') {
                         docker.image("${env.IMAGE_REPO}:${env.BUILD_NUMBER}").push()
                         docker.image("${env.IMAGE_REPO}:latest").push()

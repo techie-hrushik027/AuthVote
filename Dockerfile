@@ -5,7 +5,6 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Keep the existing layout because app.py locates Frontend relative to its file.
 COPY Backend/ /app/Backend/
 COPY Frontend/ /app/Frontend/
 
