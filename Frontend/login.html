@@ -61,7 +61,7 @@
             line-height: 1.6;
         }
 
-        .demo-label {
+        .portal-label {
             display: inline-block;
             margin-bottom: 20px;
             padding: 7px 12px;
@@ -69,6 +69,46 @@
             background: #dcfce7;
             color: #166534;
             font-size: 12px;
+            font-weight: 700;
+        }
+
+        .project-note {
+            margin: -8px 0 22px;
+            padding: 14px 16px;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            background: #f8fbff;
+            text-align: left;
+        }
+
+        .project-note h3 {
+            margin: 0 0 6px;
+            color: #1e40af;
+            font-size: 14px;
+        }
+
+        .project-note p {
+            margin: 0 0 11px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .project-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .project-steps li {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #eaf1ff;
+            color: #1d4ed8;
+            font-size: 11px;
             font-weight: 700;
         }
 
@@ -136,12 +176,22 @@
     <main class="container">
         <div class="logo" aria-hidden="true">A</div>
 
-        <span class="demo-label">CI/CD DEPLOYMENT v2</span>
+        <span class="portal-label">STUDENT ELECTION PORTAL</span>
 
         <h2>Welcome to AuthVote</h2>
         <p class="subtitle">
-            Secure student authentication for the digital voting platform.
+            A simple way for students to take part in campus elections.
         </p>
+
+        <section class="project-note" aria-label="About the AuthVote project">
+            <h3>How AuthVote works</h3>
+            <p>Sign in with your student PRN and PIN, review the election instructions, then submit your ballot.</p>
+            <ul class="project-steps" aria-label="Voting steps">
+                <li>1. Sign in</li>
+                <li>2. Review</li>
+                <li>3. Vote</li>
+            </ul>
+        </section>
 
         <form id="loginForm">
             <input type="text" id="prn" placeholder="Student PRN" aria-label="Student PRN" autocomplete="username"
