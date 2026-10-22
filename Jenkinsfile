@@ -94,5 +94,48 @@ pipeline {
                 }
             }
         }
+
+        
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'k8s-deployer-token',
+                        variable: 'K8S_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        set -eu
+
+                        KCFG=$(mktemp)
+                        trap 'rm -f "$KCFG"' EXIT
+
+                        kubectl --kubeconfig="$KCFG" config set-cluster minikube \
+                            --server=https://192.168.49.2:8443 \
+                            --certificate-authority=/var/lib/jenkins/k8s-ca.crt \
+                            --embed-certs=true
+
+                        kubectl --kubeconfig="$KCFG" config set-credentials jenkins-deployer \
+                            --token="$K8S_TOKEN"
+
+                        kubectl --kubeconfig="$KCFG" config set-context deploy \
+                            --cluster=minikube \
+                            --user=jenkins-deployer \
+                            --namespace=default
+
+                        kubectl --kubeconfig="$KCFG" config use-context deploy
+
+                        kubectl --kubeconfig="$KCFG" set image deployment/authvote \
+                            authvote="$IMAGE_REPO:$BUILD_NUMBER"
+
+                        kubectl --kubeconfig="$KCFG" rollout status deployment/authvote \
+                            --timeout=180s
+
+                        kubectl --kubeconfig="$KCFG" get deployment authvote
+                    '''
+                }
+            }
+        }
+
     }
 }
